@@ -29,20 +29,29 @@ def Login(username='18565079017', password='19930603'):
             'remember': 'on',
             'login': r'登录'
             }
-    login = requests.Session()
-    login.post(url=REQUEST_URL, data=data)
+    # login = requests.Session()
+    login = requests.Session().post(url=REQUEST_URL, data=data)
     # print(login)
     return login.cookies
 
+def getBeginComment(pageNum):
+    if pageNum == 0:
+        return 0
+    elif pageNum == 1:
+        return 25
+    elif pageNum > 1:
+        return 25 + (pageNum - 1) * 20
+
 def getCommentsById(pageNum):
     eachCommentList = []
-    URL_douban_YourName2 = URL_douban_YourName.format((pageNum-1)*20+1)
+    URL_douban_YourName2 = URL_douban_YourName.format(getBeginComment(pageNum))
     web = requests.get(URL_douban_YourName2, cookies=Login()).text
     soup = bs(web, 'html.parser')
     content = soup.find_all('div', class_='comment')
     for item in content:
         # if not item.find_all('p')[0].string is None:
-        eachCommentList.append(item.find_all('p')[0].string.strip())
+        # print(pageNum)
+        eachCommentList.append(item.find_all('p')[0].string)
     return eachCommentList
 
 
@@ -54,6 +63,7 @@ if __name__ == '__main__':
         comment = getCommentsById(page) # 前10页
         # comment = getCommentsById(11) # 前10页
         contentList.append(comment)
-        for item in comment:
-            print('{}: {}\n'.format(comment.index(item)+1, item))
     print(contentList)
+    #     for item in comment:
+    #         print('{}: {}\n'.format(comment.index(item)+1, item.decode()))
+    # print(contentList)
